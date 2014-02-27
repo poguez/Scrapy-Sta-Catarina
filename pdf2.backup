@@ -1,0 +1,35 @@
+from scrapy.spider import Spider
+from scrapy.selector import Selector
+#from scrapy.spider import BaseSpider
+from scrapy.selector import HtmlXPathSelector
+
+from stacatarina.items import StacatarinaItem
+
+class DmozSpider(Spider):
+  name = "pdf"
+  allowed_domains = ["stacatarina.gob.mx"]
+  start_urls = [
+      "http://www.stacatarina.gob.mx/wsc1215/transparency/browse/10",
+      ]
+
+  def parse(self, response):
+    #filename = response.url+".txt"
+    #open(filename, 'wb').write(response.body)
+    sel = Selector(response)
+    sites = sel.xpath('//ul[@class=\'item_list\']')
+    #sites = sel.xpath('//div[@class=\'sub_title\']/text()').extract
+    notes = []
+    for site in sites:
+      print "entro a sitios"
+      list = site.xpath('./li')
+      titulo = sel.xpath('//div[@class=\'sub_title\']/text()').re('\w+')
+      for node in list:
+        print "entro a nodos"
+        note = StacatarinaItem()
+        note['title'] = titulo
+        #note['type'] = sel.xpath('//div[@class=\'sub_title\']/text()').extract
+        note['link'] = titulo
+        #note['link'] = site.xpath('./@data-url').extract()
+        if note['link']:
+          notes.append(note)
+    return notes
